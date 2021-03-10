@@ -17,8 +17,8 @@ class Demo extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
-      date: new Date(2017, 2, 31, 15, 1, 1),
-      mode: 'datetime',
+      date: new Date(2017, 2, 31),
+      mode: 'date',
     };
   }
 
@@ -71,6 +71,7 @@ class Demo extends React.Component<any, any> {
           onValueChange={this.onValueChange}
           onScrollChange={this.onScrollChange}
           use12Hours
+          showLongTime={true}
         />
       </div>
     </div>);

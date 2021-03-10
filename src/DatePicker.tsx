@@ -23,10 +23,13 @@ function setMonth(date, month) {
 
 const DATETIME = 'datetime';
 const DATE = 'date';
+const MIN_MONTH = 0;
+const MIN_DAY = 1;
 const TIME = 'time';
 const MONTH = 'month';
 const YEAR = 'year';
 const ONE_DAY = 24 * 60 * 60 * 1000;
+const LongTime = '9999';
 
 class DatePicker extends React.Component<IDatePickerProps, any> {
   static defaultProps = {
@@ -39,6 +42,7 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
     onDateChange() {
     },
     use12Hours: false,
+    showLongTime: false,
   };
 
   state = {
@@ -220,7 +224,7 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
   }
 
   getDateData() {
-    const { locale, formatMonth, formatDay, mode } = this.props;
+    const { locale, formatMonth, formatDay, mode, showLongTime } = this.props;
     const date = this.getDate();
     const selYear = date.getFullYear();
     const selMonth = date.getMonth();
@@ -237,12 +241,18 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
         label: i + locale.year + '',
       });
     }
+    if (showLongTime) {
+      years.push({
+        value: LongTime,
+        label: locale.longTime,
+      });
+    }
     const yearCol = { key: 'year', props: { children: years } };
     if (mode === YEAR) {
       return [yearCol];
     }
 
-    const months: any[] = [];
+    let months: any[] = [];
     let minMonth = 0;
     let maxMonth = 11;
     if (minDateYear === selYear) {
@@ -258,12 +268,15 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
         label,
       });
     }
+    if (selYear === LongTime) {
+      months = [{ value: MIN_MONTH, label: '-'}];
+    }
     const monthCol = { key: 'month', props: { children: months } };
     if (mode === MONTH) {
       return [yearCol, monthCol];
     }
 
-    const days: any[] = [];
+    let days: any[] = [];
     let minDay = 1;
     let maxDay = getDaysInMonth(date);
 
@@ -279,6 +292,9 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
         value: i + '',
         label,
       });
+    }
+    if (selYear === LongTime) {
+      days = [{ value: MIN_DAY, label: '-'}];
     }
     return [
       yearCol,
@@ -382,9 +398,13 @@ class DatePicker extends React.Component<IDatePickerProps, any> {
   }
 
   clipDate(date) {
-    const { mode } = this.props;
+    const { mode, showLongTime } = this.props;
     const minDate = this.getMinDate();
     const maxDate = this.getMaxDate();
+    // 如果选择的长期直接返回
+    if (showLongTime && date >= new Date(LongTime)) {
+      return date;
+    }
     if (mode === DATETIME) {
       if (date < minDate) {
         return cloneDate(minDate);
